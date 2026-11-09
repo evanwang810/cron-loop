@@ -25,7 +25,8 @@ def _wait() -> None:
 def get(path: str, **params: object) -> object:
     query = urllib.parse.urlencode({k: v for k, v in params.items() if v is not None})
     url = f"{BASE}/{path}" + (f"?{query}" if query else "")
-    req = urllib.request.Request(url, headers={"User-Agent": "loop"})
+    headers = {"User-Agent": "loop"} | ({"Authorization": f"Key {KEY}"} if KEY and path == "me" else {})
+    req = urllib.request.Request(url, headers=headers)
     for attempt in range(5):
         _wait()
         try:

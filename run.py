@@ -107,7 +107,7 @@ class Trader:
     def sell(self, cid: str, pos: Position, value: float, price: float, now: int, why: str) -> None:
         proceeds = value
         if MODE == "live":
-            r = api.post(f"market/{cid}/sell", {"outcome": pos.side, "shares": pos.shares})
+            r = api.post(f"market/{cid}/sell", {"outcome": pos.side})  # no share count: sells the whole position, so rounding can't reject it
             proceeds = -float(r.get("amount") or -value)
         pnl = self.book.close(cid, proceeds, now, why, price if pos.side == "YES" else 1.0 - price)
         say(f"SELL {pos.side} {pos.cost:.0f} pnl {pnl:+.1f} ({why}) | {pos.question[:70]}")
@@ -222,7 +222,10 @@ def main() -> None:
             try:
                 t.look(cid, spike)
             except Exception as e:  # noqa: BLE001
-                say(f"look error {cid}: {e}")
+                detail = e.read()[:300].decode("utf-8", "replace") if hasattr(e, "read") else ""
+                say(f"look error {cid}: {e} {detail}")
+                with (STATE / f"{MODE}_errors.log").open("a", encoding="utf-8") as f:
+                    f.write(f"{now_ms()} {cid} {e} {detail}\n")
         if time.time() - settled > SETTLE_SEC:
             settled = time.time()
             t.settle()
