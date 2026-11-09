@@ -1,0 +1,39 @@
+name: loop
+
+on:
+  schedule:
+    - cron: "17 * * * *"  # only a fallback in case the restart below ever fails
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: loop
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: state
+          path: state
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q numpy
+      - run: python run.py
+        env:
+          MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY }}
+          LIVE: ${{ vars.LIVE }}
+      - name: restart
+        if: always()
+        run: gh workflow run loop.yml --ref "$GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
