@@ -27,7 +27,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q numpy
-      - run: python run.py
+      - run: exec python run.py
         env:
           MANIFOLD_API_KEY: ${{ secrets.MANIFOLD_API_KEY }}
           LIVE: ${{ vars.LIVE }}

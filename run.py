@@ -67,10 +67,12 @@ class Trader:
         self.model = Model(HERE / "model.npz")
         self.bettors = Bettors(HERE / "users.npz")
         self.users: dict[str, dict] = {}
-        bankroll = float(CFG.get("bankroll", 500))
+        self.book = Book(STATE, MODE, float(CFG.get("bankroll", 500)))
+        self.sync_cash()
+
+    def sync_cash(self) -> None:
         if MODE == "live":
-            bankroll = min(bankroll, float(api.get("me")["balance"]))
-        self.book = Book(STATE, MODE, bankroll)
+            self.book.cash = float(api.get("me")["balance"])
 
     def account(self, uid: str) -> None:
         if uid not in self.users:
@@ -146,6 +148,9 @@ class Trader:
             return
         if h.uniq[h.upto(now)] < MIN_TRADERS or liq < 1 or (spike is None and CFG.get("no_daily")):
             return
+        if hold_yes <= price and hold_no <= 1.0 - price:
+            return
+        self.sync_cash()
         entry = self.book.choose_entry(price, liq, pp, hold_yes, hold_no)
         if entry is not None:
             self.buy(cid, m, entry, price, now)
@@ -153,6 +158,8 @@ class Trader:
     def settle(self) -> None:
         now = now_ms()
         for cid in list(self.book.positions):
+            if stop:
+                break
             pos = self.book.positions[cid]
             try:
                 m = api.get(f"market/{cid}")
@@ -185,11 +192,12 @@ def push_state() -> None:
 
 def main() -> None:
     signal.signal(signal.SIGTERM, on_term)
+    signal.signal(signal.SIGINT, on_term)  # Actions sends SIGINT first when a run is cancelled
     t = Trader()
     b = t.book
     delay = t.model.delay_ms
     say(f"start: {MODE}, cash {b.cash:.1f}, {len(b.positions)} open, entry delay {delay / 1000:.0f}s")
-    start, saved, settled = time.time(), time.time(), 0.0
+    start, saved, settled = time.time(), 0.0, 0.0
     since = max(b.last_seen, now_ms() - 60_000)
     seen: set[str] = set()
     due: list[tuple[int, int, str, dict]] = []
@@ -229,6 +237,10 @@ def main() -> None:
         if time.time() - settled > SETTLE_SEC:
             settled = time.time()
             t.settle()
+            try:
+                t.sync_cash()
+            except Exception as e:
+                say(f"balance refresh failed: {e}")
         if time.time() - saved > SAVE_SEC:
             saved = time.time()
             b.log_equity(now_ms())
