@@ -984,3 +984,5 @@ opened,closed,market,url,side,stake,returned,pnl,exit,entry_price,exit_price,edg
 2026-11-27T15:14:30Z,2026-11-27T17:39:54Z,P != NP  (will it be proven by April 2027),https://manifold.markets/LarsDoucet/p-np-537cbc88aa90,NO,5.0,4.97,-0.03,sold,0.6,0.6,0.0093
 2026-11-27T18:19:35Z,2026-11-27T18:52:49Z,"Will a video game released after 2023 be a top 10 best-selling game of all time, by EOY 2026?",https://manifold.markets/Bayesian/will-a-video-game-released-after-20-0d580bfd0bb9,NO,5.0,4.86,-0.14,sold,0.45,0.44,0.0067
 2026-11-26T13:33:56Z,2026-11-27T19:41:51Z,Will my Mana exceed 3k by the end of November,https://manifold.markets/better26/will-my-mana-exceed-3k-by-the-end-o,NO,10.0,10.79,0.79,sold,0.4438,0.4952,0.0388
+2026-11-27T08:11:28Z,2026-11-27T19:51:51Z,"Will P vs NP be resolved by Nov 20, 2027?",https://manifold.markets/Bayesian/will-p-vs-np-be-resolved-by-nov-20,YES,25.0,26.27,1.27,sold,0.6489,0.69,0.0119
+2026-11-27T04:28:31Z,2026-11-27T20:03:21Z,"Will All Millennium Problems be solved by Jan 27, 2027?",https://manifold.markets/JoshSnider/will-all-millennium-problems-be-sol-2nptOlzPOZ,NO,5.0,5.0,-0.0,sold,0.8729,0.877,0.0055
